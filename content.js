@@ -142,22 +142,27 @@ function stopHighlightSystem(system){
   systemParent.classList.remove("pulsating-glow")
 }
 
-
 function createSnack(info, url, isFriendly) {
   const snack = document.createElement("div");
   snack.innerText = `${info}`;
   snack.style.display = "flex";
   snack.style.justifyContent = "center";
   snack.style.alignItems = "center";
-  snack.style.width = "300px";
+  snack.style.width = "max-content";
   snack.style.height = "30px";
   snack.style.fontSize = "9px";
-  snack.style.color = "#000";
-  snack.style.backgroundColor = isFriendly ? "#5cb85c" : "#a53103";
+  snack.style.color = "#FFF";
+  snack.style.backgroundColor = '#222223';
+  snack.style.border = `3px solid ${isFriendly ? "#5cb85c" : "#a53103"}`;
   snack.style.position = "absolute";
-  snack.style.top = "10px";
-  snack.style.left = `${window.innerWidth / 2 - 50}px`;
+  snack.style.top = "20px";
+  snack.style.transform = "translate(-50%, -50%)";
+  snack.style.left = `50%`;
   snack.style.zIndex = "999";
+  snack.style.fontWeight = "900"
+  snack.style.fontSize = "16px"
+  snack.style.padding = "5px"
+
   document.body.appendChild(snack);
   setTimeout(() => {
     document.body.removeChild(snack);
@@ -180,7 +185,24 @@ function playSound(url) {
 
 const app = async () => {
   console.log("Loaded Hells Doorbell")
+
+  const addSocketKillBacklink = () => {
+    const locationBar = document.getElementById("pf-head-user-location");
+    const backlink = document.createElement("a");
+    backlink.href = "https://socketkill.com";
+    backlink.target="_blank";
+    backlink.style.width = "max-content";
+    backlink.style.color = "#3FB950";
+    backlink.innerText = "SOCKET.KILL";
+    backlink.style.fontSize = "16px";
+    backlink.border = "1px solid #3FB950";
+    locationBar.prepend(backlink);
+  }
+
   createHistory();
+  setTimeout(() => {
+    addSocketKillBacklink()
+  }, 5000);
   
   setTimeout(() => {
     const chain = document.querySelector("#pf-map-125");
@@ -197,6 +219,8 @@ const app = async () => {
   setTimeout(() => {
     scrapeInfo();
   }, 5000);
+
+  
 
   const scrapeInfo = () => {
     const nodes = document.querySelectorAll(".pf-system-head");
@@ -243,6 +267,13 @@ const app = async () => {
     historyWindow.style.zIndex = "101";
     historyWindow.style.padding = "10px";
     historyWindow.id = "kill-history-window";
+
+    const historyEntryList = document.createElement("div");
+    historyEntryList.style.width = "100%";
+    historyEntryList.style.maxHeight = "500px";
+    historyEntryList.style.overflowY = "scroll";
+    historyEntryList.id = "history-entry-list";
+    historyWindow.prepend(historyEntryList);
 
     const volumeButton = document.createElement("div");
     volumeButton.style.width = "100px";
@@ -371,7 +402,7 @@ const app = async () => {
     const history = JSON.parse(localStorage.getItem("killHistory"));
     if (history) {
       history.forEach((kill) => {
-        createHistoryEntry(historyWindow, kill);
+        createHistoryEntry(historyEntryList, kill);
       });
     }
   }
@@ -386,7 +417,8 @@ const app = async () => {
     entry.style.alignItems = "center";
     entry.style.gap = "10px";
     entry.style.borderBottom = "1px solid black";
-    entry.style.color = kill.isFriendly ? "#5cb85c" : "#a53103";
+    entry.style.color = kill.isFriendly ? "#76b676" : "#a77865";
+    entry.style.fontWeight = "900px";
     entry.innerText = `${new Date(kill.time).toLocaleTimeString()} -- ${kill.snackInfo}`;
     entry.addEventListener("mouseenter", e=>{
       highlightSystem(kill.systemId, kill.isFriendly)
@@ -496,7 +528,7 @@ const app = async () => {
             ])
           );
         }
-        const historyWindow = document.getElementById("kill-history-window");
+        const historyWindow = document.getElementById("history-entry-list");
         if (!historyWindow) {
           console.error("No History Window")
           return;
