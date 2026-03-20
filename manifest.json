@@ -18,7 +18,7 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["ding.wav"],
+      "resources": ["ding.wav", "recruit.wav"],
       "matches": ["https://pf.darkventure.space/*"]
     }
   ],

@@ -187,16 +187,20 @@ const app = async () => {
   console.log("Loaded Hells Doorbell")
 
   const addSocketKillBacklink = () => {
-    const locationBar = document.getElementById("pf-head-user-location");
+    const locationBar = document.querySelector(".navbar-header");
     const backlink = document.createElement("a");
     backlink.href = "https://socketkill.com";
     backlink.target="_blank";
+    backlink.style.height = "100%";
+    backlink.style.display= "flex";
+    backlink.style.padding = "3px";
+
     backlink.style.width = "max-content";
     backlink.style.color = "#3FB950";
     backlink.innerText = "SOCKET.KILL";
     backlink.style.fontSize = "16px";
     backlink.border = "1px solid #3FB950";
-    locationBar.prepend(backlink);
+    locationBar.append(backlink);
   }
 
   createHistory();
@@ -479,7 +483,57 @@ const app = async () => {
     }
   }
 
+  function checkPotentialRecruit(corpString, zkill){
+    if(!localStorage.getItem("recruitPing")){
+      return;
+    }
+  const npcCorps = [
+    "Vizam",
+    "Ministry of War",
+    "Imperial Shipment",
+    "Perkone",
+    "Caldari Provisions",
+    "Deep Core Mining Inc.",
+    "The Scope",
+    "Aliaistra",
+    "Garoun Investment Bank",
+    "Brutor Tribe",
+    "Sebiestor Tribe",
+    "Native Freshfood",
+    "Hedion University",
+    "Imperial Academy",
+    "Royal Amarr Institute",
+    "School of Applied Knowledge",
+    "Science and Trade Institute",
+    "State War Academy",
+    "Center for Advanced Studies",
+    "Federal Navy Academy",
+    "University of Caille",
+    "Pator Tech School",
+    "Republic Military School",
+    "Republic University"
+  ];
+  const actualCorpName = corpString.split(": ")[1]
+  
+  if(npcCorps.includes(actualCorpName)){
+    console.log("Play Recruit Sound, make");
+    playSound("recruit.wav")
+    createSnack("Potential recruit", zkill, true);
+    const historyWindow = document.getElementById("history-entry-list");
+        if (!historyWindow) {
+          console.error("No History Window")
+          return;
+        }
+  }
+
+}
+
   async function onMessage(kill) {
+    const corp = kill.locationLabel?.split(" | ")[2];
+    const regex = /^[Jj]\d{6}$/;
+    if(regex.test(kill.system)){
+      checkPotentialRecruit(corp, kill.zkillUrl);
+    }
     try {
       let location = kill.system;
       if(knownHoles[kill.system]){
@@ -493,7 +547,6 @@ const app = async () => {
         const url = kill.zkillUrl;
         console.log(`${kill.id} is in tracked systems should play sound`)
         const finalBlowName = await fetchFinalBlowName(kill.href);
-        const corp = kill.locationLabel?.split(" | ")[2];
         const isFriendly = corp === "Corporation: Nova Prospect Enterprises"
         const apexLink = `https://eveapex.com/characters?search=${finalBlowName}&timePeriod=6&analysisDepth=200`
         const snackInfo = `${systems[location]} - ${location} - ${kill.ship} - ${corp} - ${kill.victimName}`
@@ -548,7 +601,7 @@ const app = async () => {
   }
 
 
-    const socket = io('https://socketkill.com/')
+    const socket = io('https://ws.socketkill.com/')
     socket.on("raw-kill", kill => {
       onMessage(kill)
     })
